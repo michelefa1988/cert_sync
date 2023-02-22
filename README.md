@@ -15,7 +15,7 @@ The Following are needed for cert-sync to run
 # Build
 
 ```
-docker build -t michelefa988/cert-sync -f Dockerfile.Build . 
+docker build -t michelefa1988/cert-sync -f Dockerfile.Build . 
 ```
 ## Run
 
