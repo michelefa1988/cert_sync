@@ -1,0 +1,41 @@
+########################################
+#### Part 1: Compile the code
+########################################
+FROM debian:bullseye-slim  AS production-stage
+
+#Install azure cli
+RUN apt update && apt upgrade -y \
+    && apt install -y curl \
+    && apt-get install -y jq
+
+# Install az cli
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+ARG SERVICE_NAME
+
+COPY certsync.sh /app/certsync.sh
+
+WORKDIR /app
+
+# create certsync user/group first, to be consistent throughout docker variants
+RUN set -xe \
+    && addgroup --system --gid 1001 certsync \
+    && adduser --system --disabled-login --ingroup certsync --home /opt/certsync --gecos "certsync user" --uid 1001 certsync \
+    && apt-get update \
+    && apt-get install --no-install-recommends --no-install-suggests -y \
+    apt-transport-https \
+    ca-certificates \
+    libtinfo5 \
+    openssl \
+    && apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN set -xe \
+    && chown -R certsync:certsync /app/
+
+USER certsync
+
+
+# run application
+ENTRYPOINT [ "./certsync.sh"]
